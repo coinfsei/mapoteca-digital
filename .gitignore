@@ -1,0 +1,106 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Database
+*.sql.backup
+*.dump
+*.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# ArcGIS
+*.aprx.lock
+*.gdb.lock
+*.mxd.lock
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Sensitive data
+credentials.json
+secrets.yaml
+*.key
+*.pem
+
+# Build outputs
+dist/
+build/
+```
+
+Salve em: `D:\Mapoteca_Digital\.gitignore`
+
+---
+
+## 4. Organize os arquivos enviados
+
+Mova os arquivos que você me enviou para a pasta `docs`:
+```
+D:\Mapoteca_Digital\docs\BRIEFING.md          (briefing.md)
+D:\Mapoteca_Digital\docs\PRD.md               (prd.md)
+D:\Mapoteca_Digital\docs\DATABASE.md          (database-schema-documentation.md)
+D:\Mapoteca_Digital\docs\DIAGRAMA_ER.md       (DIAGRAMA_ER_COMPLETO.md)
+D:\Mapoteca_Digital\docs\DFD.md               (DFD_MAPOTECA_DIGITAL.md)
+
+# BMAD (se não quiser versionar)
+.bmad-core/
+.claude/commands/BMad/
+.cursor/rules/bmad/
+.windsurf/workflows/
+
+echo nul >> .gitignore

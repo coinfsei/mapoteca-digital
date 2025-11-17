@@ -1,0 +1,227 @@
+# Mapoteca Digital - Automação de Publicação de Mapas
+
+## 🎯 Contexto
+Sistema low-code em ArcGIS Experience Builder para automatizar cadastro de mapas.
+Substitui processo manual de 30min por processo automatizado de 5min (83% redução).
+
+## 📚 Leia Primeiro (OBRIGATÓRIO)
+1. docs/BRIEFING.md - Problema e objetivos
+2. docs/DATABASE.md - Modelo completo (18 tabelas)
+3. docs/DIAGRAMA_ER.md - Relacionamentos
+4. docs/DFD.md - Fluxo de dados
+5. docs/PRD.md - Requisitos detalhados
+
+## 🏗️ Stack Tecnológica
+- **Frontend**: ArcGIS Experience Builder (widgets nativos)
+- **Backend**: PostgreSQL 13+ com PostGIS e SDE
+- **Storage**: PDFs em PostgreSQL via ESRI Attachments
+- **Deploy**: ArcGIS Enterprise
+
+## 🔑 Regras de Negócio Críticas
+
+### 1. Validações em Cascata
+```
+Classe Mapa → Tipo Mapa (via t_classe_mapa_tipo_mapa)
+Tipo Regionalização → Região (via t_regionalizacao_regiao)
+Tipo Tema → Tema (via t_tipo_tema_tema)
+```
+
+### 2. GlobalID (UUID)
+- Gerado automaticamente pelo PostgreSQL
+- Campo único em t_publicacao e t_publicacao_municipios
+- Chave de relacionamento com tabelas de attachments
+
+### 3. Gestão de Attachments
+- Estrutura SDE nativa do ArcGIS
+- Relacionamento via globalid
+- Campos: rel_globalid, att_name, content_type, data, data_size
+- Limite: 50MB por PDF
+- Tipo: apenas application/pdf
+
+### 4. Publicações Separadas
+- **Estaduais/Regionais**: t_publicacao + t_publicacao__attach
+- **Municipais**: t_publicacao_municipios + t_publicacao_municipios_attach
+
+## ⚡ Requisitos de Performance
+- Carregamento formulário: < 3 segundos
+- Salvamento registro: < 1 segundo
+- Upload PDF (50MB): < 30 segundos
+- Listagem paginada: < 2 segundos
+- Uptime: 99.5%
+
+## 📊 Estrutura do Banco (18 tabelas)
+```
+CAMADA 1 - Domínio (9 tabelas):
+  t_classe_mapa (2), t_tipo_mapa (3), t_anos (33),
+  t_escala (9), t_cor (2), t_tipo_tema (6),
+  t_tipo_regionalizacao (11), t_regiao (106), t_tema (55)
+
+CAMADA 2 - Relacionamentos N:N (3 tabelas):
+  t_classe_mapa_tipo_mapa (6)
+  t_regionalizacao_regiao (229)
+  t_tipo_tema_tema (55)
+
+CAMADA 3 - Municípios (1 tabela):
+  t_municipios (417)
+
+CAMADA 4 - Publicações/Fato (2 tabelas):
+  t_publicacao (estaduais/regionais)
+  t_publicacao_municipios (municipais)
+
+CAMADA 5 - Attachments (2 tabelas):
+  t_publicacao__attach
+  t_publicacao_municipios_attach
+```
+
+## 🎨 Padrões de Código
+
+### SQL
+- SEMPRE usar prepared statements
+- SEMPRE validar FKs antes de INSERT
+- SEMPRE usar transações para operações relacionadas
+- SEMPRE consultar tabelas N:N para validações em cascata
+
+### Experience Builder
+- Preferir widgets nativos (Form, List, Map)
+- Minimizar código customizado (princípio low-code)
+- Seguir convenções ESRI
+- Implementar lazy loading para dropdowns grandes
+
+### Validações
+```sql
+-- Exemplo: Validar classe + tipo
+SELECT COUNT(*) 
+FROM t_classe_mapa_tipo_mapa 
+WHERE id_classe_mapa = :classe 
+  AND id_tipo_mapa = :tipo;
+-- Deve retornar 1 para ser válido
+```
+
+## 🚫 Não Implementar
+- ❌ Sistema de autenticação customizado (usar ArcGIS Enterprise)
+- ❌ API REST customizada (usar Feature Services)
+- ❌ Storage em filesystem ou URLs externas (usar PostgreSQL SDE)
+- ❌ Modificações na estrutura de tabelas existentes
+- ❌ Remoção de índices do banco
+
+## ✅ Manter Compatibilidade
+Garantir funcionamento das 4 aplicações existentes:
+1. Mapas Estaduais
+2. Mapas Regionais
+3. Mapas Municipais
+4. Cartogramas Estaduais
+
+## 🧪 Checklist de Testes
+
+### Funcional
+- [ ] Criar publicação estadual com PDF
+- [ ] Criar publicação municipal com PDF
+- [ ] Editar publicação existente
+- [ ] Substituir PDF de publicação
+- [ ] Excluir publicação (com confirmação)
+- [ ] Validações em cascata funcionando corretamente
+- [ ] Filtros de consulta operacionais
+
+### Performance
+- [ ] Carregar formulário em < 3s
+- [ ] Salvar registro em < 1s
+- [ ] Upload 50MB em < 30s
+- [ ] Listar 100 publicações em < 2s
+
+### Compatibilidade
+- [ ] App Mapas Estaduais funcionando
+- [ ] App Mapas Regionais funcionando
+- [ ] App Mapas Municipais funcionando
+- [ ] App Cartogramas Estaduais funcionando
+
+## 📋 Ordem de Implementação
+
+### Fase 1: Foundation (Semana 1-2)
+1. Revisar e validar schema PostgreSQL
+2. Configurar Feature Services no ArcGIS Server
+3. Configurar estrutura SDE Attachments
+4. Migrar dados CSV para PostgreSQL
+
+### Fase 2: Core Form (Semana 3-4)
+1. Criar formulário principal no Experience Builder
+2. Implementar dropdowns com seleção em cascata
+3. Implementar validações de negócio
+4. Testes funcionais do formulário
+
+### Fase 3: Attachments (Semana 5-6)
+1. Implementar upload de PDFs
+2. Implementar visualização inline
+3. Implementar substituição/exclusão
+4. Testes de anexos
+
+### Fase 4: Integration (Semana 7-8)
+1. Testes de compatibilidade com apps existentes
+2. Ajustes necessários
+3. Testes de integração
+4. Documentação técnica
+
+### Fase 5: Optimization (Semana 9-10)
+1. Otimizações de performance
+2. Ajustes de UX baseados em feedback
+3. Testes de carga
+4. Deploy em produção
+
+## 🔍 SQL Útil
+
+### Obter Combinações Válidas
+```sql
+-- Classes e tipos permitidos
+SELECT cm.nome_classe_mapa, tm.nome_tipo_mapa
+FROM t_classe_mapa_tipo_mapa cmtm
+JOIN t_classe_mapa cm ON cmtm.id_classe_mapa = cm.id_classe_mapa
+JOIN t_tipo_mapa tm ON cmtm.id_tipo_mapa = tm.id_tipo_mapa;
+
+-- Regiões por tipo de regionalização
+SELECT r.nome_regiao, r.abrangencia
+FROM t_regionalizacao_regiao rr
+JOIN t_regiao r ON rr.id_regiao = r.id_regiao
+WHERE rr.id_tipo_regionalizacao = 'TRG01';
+
+-- Temas por tipo
+SELECT t.nome_tema, t.codigo_tema
+FROM t_tipo_tema_tema ttt
+JOIN t_tema t ON ttt.id_tema = t.id_tema
+WHERE ttt.id_tipo_tema = 'TTM01';
+```
+
+### Verificar Attachments
+```sql
+-- Listar PDFs de uma publicação
+SELECT 
+    attachmentid,
+    att_name,
+    data_size / 1024 / 1024 as size_mb,
+    content_type
+FROM t_publicacao__attach
+WHERE rel_globalid = 'uuid-aqui'::uuid;
+```
+
+## 📚 Referências
+- ESRI Attachments: https://developers.arcgis.com/rest/services-reference/attachment.htm
+- Experience Builder: https://developers.arcgis.com/experience-builder/
+- Feature Services: https://developers.arcgis.com/rest/services-reference/
+- PostgreSQL UUID: https://www.postgresql.org/docs/current/datatype-uuid.html
+
+## ⚠️ Avisos Críticos
+
+1. **NUNCA** modificar estrutura de tabelas sem documentar
+2. **SEMPRE** validar FKs antes de inserir dados
+3. **SEMPRE** usar globalid (UUID) para relacionar attachments
+4. **SEMPRE** testar compatibilidade com apps existentes
+5. **NUNCA** armazenar PDFs fora do PostgreSQL
+6. **SEMPRE** validar combinações via tabelas N:N
+7. **NUNCA** assumir valores padrão sem consultar domínios
+
+---
+
+**Versão**: 1.0  
+**Data**: 2025-11-17  
+**Projeto**: Mapoteca Digital  
+**Organização**: SEIGEO/SEI-BA  
+**Database**: mapoteca  
+**Schema**: dados_mapoteca
