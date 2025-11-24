@@ -275,19 +275,20 @@ Veja [CHANGELOG.md](CHANGELOG.md) para histórico de versões.
 
 ### Desenvolvimento
 
-- **SEIGEO** - Superintendência de Estudos Econômicos e Sociais da Bahia
-- **SEI-BA** - Coordenação de Geoprocessamento
+- **SEI** - Superintendência de Estudos Econômicos e Sociais da Bahia
+- **DIGEO** - Diretoria de Informações Geoambientais
+- **CGEO** - Coordenação de Geoprocessamento
 
 ### Contato
 
-- **Email**: seigeo@sei.ba.gov.br
+- **Email**: sandovalmedeiros@sei.ba.gov.br
 - **Site**: https://www.sei.ba.gov.br
 
 ## 🙏 Agradecimentos
 
 - Equipe ESRI pela plataforma ArcGIS
 - Comunidade PostgreSQL/PostGIS
-- Técnicos do SEIGEO que forneceram feedback valioso
+- Técnicos da DIGEO que forneceram feedback valioso
 
 ---
 
